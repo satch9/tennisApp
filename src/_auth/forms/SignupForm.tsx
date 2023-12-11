@@ -12,19 +12,31 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SignupValidation } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
 import { Link } from "react-router-dom";
+import { createPlayerAccount } from "@/lib/appwrite/api";
 
 const SignupForm = () => {
-  const isLoaded = true;
+  const isLoaded = false;
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
     defaultValues: {
-      name: "",
+      firstname: "",
+      lastname:"",
+      gender:"F",
       username: "",
+      dateOfBirth: "",
       email: "",
       password: "",
     },
@@ -32,9 +44,14 @@ const SignupForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    console.log("signup values", values)
+    console.log("signup values", values);
     // create new user
-    //const newUser = await createUserAccount(values)
+    const newUser = await createPlayerAccount(values);
+
+    console.log(newUser);
+    if(!newUser){
+      return;
+    }
   }
 
   return (
@@ -58,7 +75,20 @@ const SignupForm = () => {
         >
           <FormField
             control={form.control}
-            name="name"
+            name="firstname"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Prénom</FormLabel>
+                <FormControl>
+                  <Input type="text" className="shad-input" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastname"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nom</FormLabel>
@@ -71,12 +101,56 @@ const SignupForm = () => {
           />
           <FormField
             control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sexe</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="shad-input w-[60px]">
+                      <SelectValue  />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="F">F</SelectItem>
+                      <SelectItem value="M">M</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nom d'utilisateur</FormLabel>
                 <FormControl>
                   <Input type="text" className="shad-input" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date de naissance</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="format JJ/MM/AAAA"
+                    className="shad-input"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -119,8 +193,11 @@ const SignupForm = () => {
           </Button>
           <p className="text-small-regular text-light-2 text-center mt-2">
             Déjà un compte ?
-            <Link to="/sign-in" className="text-primary-500 text-small-semibold ml-1">
-               Se connecter
+            <Link
+              to="/sign-in"
+              className="text-primary-500 text-small-semibold ml-1"
+            >
+              Se connecter
             </Link>
           </p>
         </form>
