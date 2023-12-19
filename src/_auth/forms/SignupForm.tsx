@@ -2,6 +2,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import { useToast } from "@/components/ui/use-toast"
+
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,19 +25,34 @@ import {
 } from "@/components/ui/select";
 import { SignupValidation } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
-import { Link } from "react-router-dom";
-import { createPlayerAccount } from "@/lib/appwrite/api";
+import { Link, useNavigate } from "react-router-dom";
+
+import { useCreatePlayerAccount, useSignInAccount } from "@/lib/react-query/queriesAndMutations"
+import { usePlayerContext } from "@/context/AuthContext";
 
 const SignupForm = () => {
-  const isLoaded = false;
+  const { toast } = useToast()
+  const { checkAuthPlayer, isLoading: isPlayerLoading } = usePlayerContext();
+  const navigate = useNavigate()
+
+  const {
+    mutateAsync: createPlayerAccount,
+    isPending: isCreatingAccount
+  } = useCreatePlayerAccount()
+
+  const {
+    mutateAsync: signInAccount,
+    isPending: isSigningIn
+  } = useSignInAccount()
+
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
     defaultValues: {
       firstname: "",
-      lastname:"",
-      gender:"F",
+      lastname: "",
+      gender: "F",
       username: "",
       dateOfBirth: "",
       email: "",
@@ -48,10 +66,35 @@ const SignupForm = () => {
     // create new user
     const newUser = await createPlayerAccount(values);
 
-    console.log(newUser);
-    if(!newUser){
-      return;
+    console.log("newUser Signupform", newUser);
+    if (!newUser) {
+      return toast({
+        title: "Votre inscription a échoué. Merci d'essayer à nouveau"
+      })
     }
+
+    const session = await signInAccount({
+      email: values.email,
+      password: values.password
+    })
+
+    if (!session) {
+      return toast({
+        title: "Echec de connexion. Merci d'essayer à nouveau"
+      })
+    }
+
+    const isLoggedIn = await checkAuthPlayer();
+
+    if (isLoggedIn) {
+      form.reset();
+      navigate('/');
+    } else {
+      return toast({
+        title: "Votre inscription a échoué. Merci d'essayer à nouveau"
+      })
+    }
+
   }
 
   return (
@@ -111,7 +154,7 @@ const SignupForm = () => {
                 >
                   <FormControl>
                     <SelectTrigger className="shad-input w-[60px]">
-                      <SelectValue  />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -183,7 +226,7 @@ const SignupForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isLoaded ? (
+            {isCreatingAccount ? (
               <div className="flex-center gap-2">
                 <Loader /> Chargement...
               </div>

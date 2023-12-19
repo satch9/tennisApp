@@ -1,10 +1,10 @@
-import { Client, Account, Databases, Storage, Avatars} from "appwrite";
+import { Client, Account, Databases, Storage, Avatars } from "appwrite";
 
 export const appwriteConfig = {
-    url : import.meta.env.VITE_APPWRITE_URL,
-    projectId : import.meta.env.VITE_APPWRITE_PROJECT_ID,
-    databaseId : import.meta.env.VITE_APPWRITE_DATABASE_ID,
-    storageId : import.meta.env.VITE_APPWRITE_STORAGE_ID,
+    url: import.meta.env.VITE_APPWRITE_URL,
+    projectId: import.meta.env.VITE_APPWRITE_PROJECT_ID,
+    databaseId: import.meta.env.VITE_APPWRITE_DATABASE_ID,
+    storageId: import.meta.env.VITE_APPWRITE_STORAGE_ID,
     tieBreackerCollectionId: import.meta.env.VITE_APPWRITE_TIE_BREAKERS_ID,
     setScoreCollectionId: import.meta.env.VITE_APPWRITE_SET_SCORE_ID,
     fixturesCollectionId: import.meta.env.VITE_APPWRITE_FIXTURES_ID,
@@ -18,12 +18,15 @@ export const appwriteConfig = {
     surfaceTypesCollectionId: import.meta.env.VITE_APPWRITE_SURFACE_TYPES_ID,
     countriesCollectionId: import.meta.env.VITE_APPWRITE_COUNTRIES_ID,
     playersCollectionId: import.meta.env.VITE_APPWRITE_PLAYERS_ID,
-}
+    apiKey: import.meta.env.VITE_APPWRITE_API_KEY,
+};
 
 export const client = new Client();
 
 client.setProject(appwriteConfig.projectId);
 client.setEndpoint(appwriteConfig.url)
+//client.setJWT(appwriteConfig.apiKey)
+
 
 export const account = new Account(client);
 export const databases = new Databases(client);
