@@ -1,4 +1,4 @@
-import { ID, Query } from 'appwrite';
+import { ID, Query, Permission, Role } from 'appwrite';
 import { INewPlayer } from "@/types";
 import { account, appwriteConfig, databases } from './config';
 
@@ -65,6 +65,9 @@ export async function savePlayerToDB(player: {
             appwriteConfig.playersCollectionId,
             documentId,
             player,
+            [
+                Permission.write(Role.any())
+            ]
         )
 
         console.log("newPlayer API", newPlayer);
